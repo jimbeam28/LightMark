@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="{{ site.language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site.title }}{% endblock %}</title>
+  <meta name="description" content="{{ site.description }}">
+
+  <!-- 样式文件 -->
+  <link rel="stylesheet" href="{{ rootPath }}assets/css/base.css">
+  <link rel="stylesheet" href="{{ rootPath }}assets/css/layout.css">
+  <link rel="stylesheet" href="{{ rootPath }}assets/css/components.css">
+  <link rel="stylesheet" href="{{ rootPath }}assets/css/code.css">
+
+  {% block styles %}{% endblock %}
+</head>
+<body>
+  <!-- 站点头部 -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="{{ rootPath }}index.html" class="site-title">{{ site.title }}</a>
+
+      <button class="mobile-menu-toggle" aria-label="打开菜单">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav">
+        {% for s in allSeries %}
+          <a href="{% if page.template == 'home' %}./series/{{ s.name }}/{{ s.firstArticle.slug }}.html{% elif page.template == 'series' or page.template == 'article' %}../{{ s.name }}/{{ s.firstArticle.slug }}.html{% elif page.template == 'tag' %}../../series/{{ s.name }}/{{ s.firstArticle.slug }}.html{% else %}../series/{{ s.name }}/{{ s.firstArticle.slug }}.html{% endif %}" class="nav-link">{{ s.title }}</a>
+        {% endfor %}
+        <a href="{% if page.template == 'home' %}./tags/index.html{% elif page.template == 'series' or page.template == 'article' %}../../tags/index.html{% elif page.template == 'tag' %}../index.html{% elif page.template == 'tags' %}./index.html{% else %}./tags/index.html{% endif %}" class="nav-link">标签</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="theme-toggle" aria-label="切换主题">
+          <span class="light-icon">&#9728;</span>
+          <span class="dark-icon">&#127769;</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 移动端遮罩 -->
+  <div class="mobile-overlay" hidden></div>
+
+  <!-- 页面内容 -->
+  <main class="main-content {% block mainClass %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- 站点底部 -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>&copy; {{ site.author }} &middot; 使用 LightMark 构建</p>
+    </div>
+  </footer>
+
+  <!-- 回到顶部按钮 -->
+  <button class="back-to-top" aria-label="回到顶部" hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <!-- 脚本 -->
+  <script src="{{ rootPath }}assets/js/main.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

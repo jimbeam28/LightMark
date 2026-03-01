@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ site.title }}{% endblock %}
+{% block mainClass %}home-page{% endblock %}
+
+{% block content %}
+<div class="home-container">
+  <div class="home-header">
+    <h1 class="site-description">{{ site.description }}</h1>
+  </div>
+
+  <div class="series-grid">
+    {% for series in allSeries %}
+    <section class="series-card">
+      <header class="series-card-header">
+        <h2 class="series-card-title">
+          <a href="{{ rootPath }}series/{{ series.name }}/{{ series.articles[0].slug }}.html">{{ series.title }}</a>
+        </h2>
+        <span class="article-count">{{ series.articles.length }} 篇</span>
+      </header>
+
+      <ul class="article-list-mini">
+        {% for article in series.articles %}
+        <li class="article-item-mini">
+          <span class="article-order">{{ article.order }}</span>
+          <a href="{{ rootPath }}series/{{ article.series }}/{{ article.slug }}.html" class="article-link">{{ article.title }}</a>
+          <time class="article-date">{{ article.date | date('MM-DD') }}</time>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <a href="{{ rootPath }}series/{{ series.name }}/{{ series.articles[0].slug }}.html" class="series-view-all">查看全部 &rarr;</a>
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

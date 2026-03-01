@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}所有标签 - {{ site.title }}{% endblock %}
+{% block mainClass %}tags-page{% endblock %}
+
+{% block content %}
+<div class="tags-container">
+  <h1 class="page-title">所有标签</h1>
+
+  <div class="tags-cloud">
+    {% for tag in tags %}
+    <a href="{{ rootPath }}tags/{{ tag.name }}/index.html" class="tag-item" style="font-size: {{ 14 + tag.count * 2 }}px">
+      {{ tag.name }}
+      <span class="tag-count">{{ tag.count }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

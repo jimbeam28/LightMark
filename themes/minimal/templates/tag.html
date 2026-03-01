@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ tag }} - {{ site.title }}{% endblock %}
+{% block mainClass %}tag-detail-page{% endblock %}
+
+{% block content %}
+<div class="tag-detail-container">
+  <header class="tag-header">
+    <h1 class="page-title">
+      <span class="tag-label">{{ tag }}</span>
+      <span class="tag-meta">{{ articles.length }} 篇文章</span>
+    </h1>
+  </header>
+
+  <div class="article-list">
+    {% for article in articles %}
+    <article class="article-card">
+      <h2 class="article-card-title">
+        <a href="{{ rootPath }}series/{{ article.series }}/{{ article.slug }}.html">{{ article.title }}</a>
+      </h2>
+      <div class="article-card-meta">
+        <span class="series-name">{{ article.seriesTitle }}</span>
+        <time>{{ article.date }}</time>
+      </div>
+      <p class="article-card-excerpt">{{ article.excerpt }}</p>
+      <div class="article-card-tags">
+        {% for t in article.tags %}
+        <a href="{{ rootPath }}tags/{{ t }}/index.html" class="tag{% if t == tag %} active{% endif %}">{{ t }}</a>
+        {% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

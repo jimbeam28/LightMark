@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ series.title }} - {{ site.title }}{% endblock %}
+{% block mainClass %}series-page{% endblock %}
+
+{% block content %}
+<div class="page-layout has-sidebar">
+  <!-- 左侧：系列导航 -->
+  <aside class="sidebar series-sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">{{ series.title }}</h2>
+      <span class="sidebar-count">{{ series.articles.length }} 篇文章</span>
+    </div>
+
+    <nav class="series-nav">
+      {% for article in series.articles %}
+      <a href="./{{ article.slug }}.html" class="series-nav-link{% if loop.first %} active{% endif %}">
+        <span class="nav-order">{{ article.order }}</span>
+        <span class="nav-title">{{ article.title }}</span>
+      </a>
+      {% endfor %}
+    </nav>
+  </aside>
+
+  <!-- 中间：首篇文章内容 -->
+  <article class="content-main">
+    {% if series.firstArticle %}
+      {% set article = series.firstArticle %}
+
+      <header class="article-header">
+        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="article-meta">
+          <time datetime="{{ article.date }}">{{ article.date }}</time>
+          {% if article.tags.length > 0 %}
+          <div class="article-tags">
+            {% for tag in article.tags %}
+            <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </header>
+
+      <div class="article-body">
+        {{ article.content | safe }}
+      </div>
+
+      <nav class="article-pagination">
+        {% if series.articles.length > 1 %}
+        <a href="./{{ series.articles[1].slug }}.html" class="pagination-next">
+          下一篇：{{ series.articles[1].title }} &rarr;
+        </a>
+        {% endif %}
+      </nav>
+    {% else %}
+      <div class="empty-state">
+        <p>该系列暂无文章</p>
+      </div>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ rootPath }}assets/js/sidebar.js"></script>
+{% endblock %}

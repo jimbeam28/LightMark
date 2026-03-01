@@ -5,7 +5,6 @@ import {
   remove,
   listMarkdownFiles,
   writeFile,
-  writeJSON,
   copy,
   pathExists
 } from '../utils/file.js'
@@ -13,7 +12,6 @@ import { parseArticle } from '../parser/frontmatter.js'
 import { createMarkdownRenderer, markdownToHtml, extractExcerpt } from '../parser/markdown.js'
 import { processHeadings } from '../parser/toc.js'
 import { buildSiteData, createPageContext } from './site.js'
-import { generateAllIndices } from './search.js'
 import { createRenderer, render } from '../renderer/nunjucks.js'
 
 /**
@@ -47,17 +45,14 @@ export async function build(rootDir, options = {}) {
   // 5. Build site data
   const siteData = buildSiteData(config, articles)
 
-  // 6. Generate search indices
-  const indices = generateAllIndices(siteData)
-
-  // 7. Load theme and create renderer
+  // 6. Load theme and create renderer
   const renderer = createRenderer(themeDir)
 
-  // 8. Render pages
+  // 7. Render pages
   console.log('Rendering pages...')
-  await renderPages(renderer, siteData, indices, outputDir)
+  await renderPages(renderer, siteData, outputDir)
 
-  // 9. Copy theme assets
+  // 8. Copy theme assets
   const assetsSrc = path.join(themeDir, 'assets')
   const assetsDest = path.join(outputDir, 'assets')
   const assetsExists = await pathExists(assetsSrc)
@@ -65,11 +60,6 @@ export async function build(rootDir, options = {}) {
     await copy(assetsSrc, assetsDest)
     console.log('Copied theme assets')
   }
-
-  // 10. Write search index
-  const searchIndexPath = path.join(outputDir, 'assets', 'search-index.json')
-  await writeJSON(searchIndexPath, indices.search)
-  console.log('Generated search index')
 
   console.log('Build complete!')
 
@@ -132,10 +122,9 @@ async function parseAllArticles(markdownDir, config) {
  * Render all pages
  * @param {Object} renderer - Nunjucks renderer
  * @param {Object} siteData - Site data
- * @param {Object} indices - Search indices
  * @param {string} outputDir - Output directory
  */
-async function renderPages(renderer, siteData, indices, outputDir) {
+async function renderPages(renderer, siteData, outputDir) {
   // Render homepage
   await renderHomePage(renderer, siteData, outputDir)
 
@@ -146,7 +135,7 @@ async function renderPages(renderer, siteData, indices, outputDir) {
   await renderArticlePages(renderer, siteData, outputDir)
 
   // Render tags pages
-  await renderTagsPages(renderer, siteData, indices, outputDir)
+  await renderTagsPages(renderer, siteData, outputDir)
 }
 
 /**
@@ -154,7 +143,8 @@ async function renderPages(renderer, siteData, indices, outputDir) {
  */
 async function renderHomePage(renderer, siteData, outputDir) {
   const context = createPageContext('home', siteData, {
-    title: siteData.site.title
+    title: siteData.site.title,
+    rootPath: './'
   })
 
   const html = render(renderer, 'home.html', context)
@@ -171,7 +161,8 @@ async function renderSeriesPages(renderer, siteData, outputDir) {
 
     const context = createPageContext('series', siteData, {
       series,
-      title: series.title
+      title: series.title,
+      rootPath: '../../'
     })
 
     const html = render(renderer, 'series.html', context)
@@ -194,7 +185,8 @@ async function renderArticlePages(renderer, siteData, outputDir) {
       content: article.content,
       toc: article.toc,
       series: siteData.series.find(s => s.name === article.series),
-      title: article.title
+      title: article.title,
+      rootPath: '../../'
     })
 
     const html = render(renderer, 'article.html', context)
@@ -205,14 +197,25 @@ async function renderArticlePages(renderer, siteData, outputDir) {
 /**
  * Render tags pages
  */
-async function renderTagsPages(renderer, siteData, indices, outputDir) {
+async function renderTagsPages(renderer, siteData, outputDir) {
   // Tags index page
   const tagsDir = path.join(outputDir, 'tags')
   await ensureDir(tagsDir)
 
+  // Build tag indices from site data
+  const tagIndices = Object.entries(siteData.tags).map(([name, articles]) => ({
+    name,
+    count: articles.length,
+    url: `tags/${name}/index.html`
+  })).sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count
+    return a.name.localeCompare(b.name)
+  })
+
   const tagsContext = createPageContext('tags', siteData, {
-    tags: indices.tags,
-    title: 'Tags'
+    tags: tagIndices,
+    title: 'Tags',
+    rootPath: '../'
   })
 
   const tagsHtml = render(renderer, 'tags.html', tagsContext)
@@ -226,7 +229,8 @@ async function renderTagsPages(renderer, siteData, indices, outputDir) {
     const context = createPageContext('tag', siteData, {
       tag: tagName,
       articles: tagArticles,
-      title: `Tag: ${tagName}`
+      title: `Tag: ${tagName}`,
+      rootPath: '../../'
     })
 
     const html = render(renderer, 'tag.html', context)

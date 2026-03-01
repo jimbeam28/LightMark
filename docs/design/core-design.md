@@ -30,9 +30,7 @@ core/
 │
 ├── generator/              # 构建生成
 │   ├── index.js           # 构建入口
-│   ├── indexer.js         # 生成搜索索引
-│   ├── tags.js            # 生成标签数据
-│   └── series.js          # 生成系列数据
+│   └── site.js            # 生成系列、标签数据
 │
 ├── renderer/               # 模板渲染
 │   └── nunjucks.js        # Nunjucks 渲染器
@@ -91,8 +89,7 @@ core/
   tags: {
     'go': [/* 相关文章 */],
     'basics': [/* 相关文章 */]
-  },
-  searchIndex: [/* 用于搜索的扁平数据 */]
+  }
 }
 ```
 
@@ -112,19 +109,16 @@ async function build(rootDir) {
   const articles = await parseMarkdownFiles(rootDir + '/markdown')
 
   // 3. 组织数据结构
-  const { series, tags, searchIndex } = organizeData(articles)
+  const { series, tags } = organizeData(articles)
 
   // 4. 加载主题
   const theme = loadTheme(rootDir + '/themes/' + config.theme)
 
   // 5. 渲染页面
-  await renderPages({ config, series, tags, searchIndex }, theme, rootDir + '/dist')
+  await renderPages({ config, series, tags }, theme, rootDir + '/dist')
 
   // 6. 复制静态资源
   await copyAssets(theme, rootDir + '/dist')
-
-  // 7. 输出搜索索引
-  await writeJSON(rootDir + '/dist/assets/search-index.json', searchIndex)
 }
 ```
 
@@ -346,10 +340,9 @@ series: 系列显示名                   # 可选：覆盖系列名（默认用
    - Markdown → HTML
    - 代码高亮
    - 生成 TOC 数据
-4. 生成索引
-   - 文章索引（搜索用）
-   - 标签索引
-   - 系列索引
+4. 生成数据结构
+   - 系列数据
+   - 标签数据
 5. 渲染页面
    - 应用模板
    - 复制静态资源
@@ -360,10 +353,84 @@ series: 系列显示名                   # 可选：覆盖系列名（默认用
 
 ## 11. URL 设计
 
-| 页面 | URL | 说明 |
-|------|-----|------|
+### 11.1 输出结构
+
+| 页面 | 路径 | 说明 |
+|------|------|------|
 | 首页 | `/index.html` | 系列列表 |
-| 系列页 | `/series/{name}/index.html` | 系列第一篇文章 |
+| 系列页 | `/series/{name}/index.html` | 系列首页 |
 | 文章页 | `/series/{name}/{slug}.html` | 具体文章 |
 | 标签列表 | `/tags/index.html` | 所有标签 |
 | 标签详情 | `/tags/{tag}/index.html` | 标签下文章 |
+
+### 11.2 相对路径设计
+
+为保证生成的站点可移植（可移动到任意目录或域名下运行），所有内部链接使用**相对路径**。
+
+#### 各页面类型的 rootPath
+
+模板通过 `rootPath` 变量获取当前页面到站点根目录的相对路径：
+
+| 页面类型 | 文件位置 | rootPath | 用途 |
+|----------|----------|----------|------|
+| 首页 | `index.html` | `./` | 资源引用 |
+| 系列页 | `series/{name}/index.html` | `../../` | 资源引用 |
+| 文章页 | `series/{name}/{slug}.html` | `../../` | 资源引用 |
+| 标签列表 | `tags/index.html` | `../` | 资源引用 |
+| 标签详情 | `tags/{tag}/index.html` | `../` | 资源引用 |
+
+#### 资源路径模板
+
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="{{ rootPath }}assets/css/base.css">
+
+<!-- JS -->
+<script src="{{ rootPath }}assets/js/main.js"></script>
+
+<!-- 页面间链接（首页） -->
+<a href="./series/{name}/index.html">系列</a>
+<a href="./tags/index.html">标签</a>
+
+<!-- 页面间链接（系列/文章页） -->
+<a href="../{name}/index.html">系列</a>
+<a href="../../tags/index.html">标签</a>
+
+<!-- 页面间链接（标签页） -->
+<a href="../series/{name}/index.html">系列</a>
+<a href="./index.html">标签</a>
+```
+
+#### 实现方式
+
+在 `src/generator/index.js` 中，根据页面类型设置 `rootPath`：
+
+```javascript
+// 首页
+const homeContext = createPageContext('home', siteData, {
+  rootPath: './'
+})
+
+// 系列页
+const seriesContext = createPageContext('series', siteData, {
+  series,
+  rootPath: '../../'
+})
+
+// 文章页
+const articleContext = createPageContext('article', siteData, {
+  article,
+  rootPath: '../../'
+})
+
+// 标签列表
+const tagsContext = createPageContext('tags', siteData, {
+  rootPath: '../'
+})
+
+// 标签详情
+const tagContext = createPageContext('tag', siteData, {
+  tag: tagName,
+  rootPath: '../'
+})
+```

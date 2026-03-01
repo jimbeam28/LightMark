@@ -1,0 +1,25 @@
+name: minimal
+version: 1.0.0
+description: LightMark 默认主题，简洁清晰的三栏布局
+author: LightMark Team
+license: MIT
+
+# 主题特性
+features:
+  - responsive          # 响应式设计
+  - dark-mode          # 暗色模式支持
+  - toc-highlight      # TOC 滚动高亮
+
+# 依赖的外部库（可选）
+dependencies: []
+
+# 主题配置项
+config:
+  # 是否默认启用暗色模式
+  defaultDarkMode: false
+
+  # TOC 显示层级
+  tocLevels: [2, 3]
+
+  # 代码块主题
+  codeTheme: github-dark

@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ article.title }} - {{ site.title }}{% endblock %}
+{% block mainClass %}article-page{% endblock %}
+
+{% block content %}
+<div class="page-layout has-sidebar{% if toc and toc.length > 0 %} has-toc{% endif %}">
+  <!-- 左侧：系列导航 -->
+  <aside class="sidebar series-sidebar">
+    <div class="sidebar-header">
+      <a href="./{{ series.articles[0].slug }}.html" class="series-back">&larr; {{ series.title }}</a>
+    </div>
+
+    <nav class="series-nav">
+      {% for art in series.articles %}
+      <a href="./{{ art.slug }}.html" class="series-nav-link{% if art.slug == article.slug %} active{% endif %}">
+        <span class="nav-order">{{ art.order }}</span>
+        <span class="nav-title">{{ art.title }}</span>
+      </a>
+      {% endfor %}
+    </nav>
+  </aside>
+
+  <!-- 中间：文章内容 -->
+  <article class="content-main">
+    <header class="article-header">
+      <h1 class="article-title">{{ article.title }}</h1>
+      <div class="article-meta">
+        <time datetime="{{ article.date }}">{{ article.date | date('YYYY-MM-DD') }}</time>
+        {% if article.tags.length > 0 %}
+        <div class="article-tags">
+          {% for tag in article.tags %}
+          <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="article-body">
+      {{ content | safe }}
+    </div>
+
+    <nav class="article-pagination">
+      {% if article.prev %}
+      <a href="./{{ article.prev.slug }}.html" class="pagination-prev">
+        &larr; {{ article.prev.title }}
+      </a>
+      {% endif %}
+      {% if article.next %}
+      <a href="./{{ article.next.slug }}.html" class="pagination-next">
+        {{ article.next.title }} &rarr;
+      </a>
+      {% endif %}
+    </nav>
+  </article>
+
+  <!-- 右侧：TOC -->
+  {% if toc and toc.length > 0 %}
+  <aside class="toc-sidebar">
+    <div class="toc-container">
+      <h3 class="toc-title">目录</h3>
+      <nav class="toc-nav">
+        {% for item in toc %}
+        <a href="#{{ item.id }}" class="toc-link toc-level-{{ item.level }}">
+          {{ item.text }}
+        </a>
+        {% endfor %}
+      </nav>
+    </div>
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ rootPath }}assets/js/sidebar.js"></script>
+<script src="{{ rootPath }}assets/js/toc.js"></script>
+{% endblock %}

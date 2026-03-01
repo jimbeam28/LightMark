@@ -36,7 +36,7 @@ export function generateTagIndex(tags) {
     index.push({
       name,
       count: articles.length,
-      url: `/tags/${name}/`
+      url: `tags/${name}/index.html`
     })
   }
 

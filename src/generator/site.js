@@ -68,7 +68,7 @@ export function buildSiteData(config, articles) {
 
   // Generate URLs for series
   for (const s of series) {
-    s.url = `/series/${s.name}/`
+    s.url = `series/${s.name}/index.html`
     if (s.articles.length > 0) {
       s.firstArticle = s.articles[0]
     }
@@ -89,15 +89,15 @@ export function buildSiteData(config, articles) {
 }
 
 /**
- * Generate URL for an article
+ * Generate relative URL for an article
  * @param {Object} article - Article object
- * @returns {string} - Article URL
+ * @returns {string} - Article relative URL
  */
 function generateArticleUrl(article) {
   if (article.series) {
-    return `/series/${article.series}/${article.slug}.html`
+    return `series/${article.series}/${article.slug}.html`
   }
-  return `/${article.slug}.html`
+  return `${article.slug}.html`
 }
 
 /**

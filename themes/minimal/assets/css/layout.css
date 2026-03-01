@@ -1,0 +1,338 @@
+/* ===== 头部 ===== */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 100;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.site-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.site-title:hover {
+  color: var(--color-primary);
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.nav-link {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--color-text);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ===== 移动端菜单 ===== */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+  width: 20px;
+  height: 2px;
+  background-color: var(--color-text);
+  transition: transform var(--transition-fast);
+  border-radius: 1px;
+}
+
+/* ===== 主内容区 ===== */
+.main-content {
+  min-height: calc(100vh - var(--header-height));
+  padding-top: var(--header-height);
+}
+
+/* ===== 页面布局（带侧边栏） ===== */
+.page-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  gap: var(--space-8);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--space-8);
+}
+
+.page-layout.has-toc {
+  grid-template-columns: var(--sidebar-width) 1fr var(--toc-width);
+}
+
+/* ===== 侧边栏 ===== */
+.sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-8));
+  height: calc(100vh - var(--header-height) - var(--space-16));
+  overflow-y: auto;
+  padding-right: var(--space-4);
+}
+
+.sidebar-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.sidebar-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.series-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.series-back:hover {
+  color: var(--color-primary);
+}
+
+.series-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.series-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  transition: all var(--transition-fast);
+}
+
+.series-nav-link:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.series-nav-link.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.nav-order {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ===== TOC 侧边栏 ===== */
+.toc-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-8));
+  height: calc(100vh - var(--header-height) - var(--space-16));
+  overflow-y: auto;
+}
+
+.toc-container {
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-border);
+}
+
+.toc-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toc-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toc-link {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  line-height: 1.5;
+}
+
+.toc-link:hover {
+  color: var(--color-primary);
+}
+
+.toc-link.active {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.toc-level-2 { padding-left: 0; }
+.toc-level-3 { padding-left: var(--space-3); }
+.toc-level-4 { padding-left: var(--space-6); }
+
+/* ===== 内容区 ===== */
+.content-main {
+  min-width: 0;
+  max-width: var(--content-max-width);
+}
+
+.article-header {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.article-title {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  flex-wrap: wrap;
+}
+
+.article-tags {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ===== 底部 ===== */
+.site-footer {
+  padding: var(--space-8) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* ===== 回到顶部按钮 ===== */
+.back-to-top {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  z-index: 50;
+}
+
+.back-to-top:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.back-to-top[hidden] {
+  display: none;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 1200px) {
+  .page-layout.has-toc {
+    grid-template-columns: var(--sidebar-width) 1fr;
+  }
+
+  .toc-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .page-layout,
+  .page-layout.has-toc {
+    grid-template-columns: 1fr;
+    padding: var(--space-5);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: 280px;
+    height: calc(100vh - var(--header-height));
+    background-color: var(--color-bg);
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-5);
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    z-index: 90;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .article-title {
+    font-size: var(--text-2xl);
+  }
+}

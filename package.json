@@ -1,0 +1,29 @@
+{
+  "name": "lightmark",
+  "version": "1.0.0",
+  "description": "A simple static blog generator for managing multiple series of Markdown notes",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "lightmark": "./src/cli/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "static-site-generator",
+    "markdown",
+    "blog"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.0.0",
+    "js-yaml": "^4.1.0",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "shiki": "^1.2.0",
+    "nunjucks": "^3.2.4",
+    "fs-extra": "^11.2.0"
+  }
+}

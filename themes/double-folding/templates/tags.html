@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}标签 - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="tags-page">
+    <h1 class="page-title">标签</h1>
+
+    <div class="tags-cloud">
+      {% for tagName in allTags %}
+      <a href="{{ rootPath }}tags/{{ tagName }}/index.html" class="tag-item">
+        {{ tagName }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="tags-list">
+      {% for tagName in allTags %}
+      <section class="tag-section" id="tag-{{ tagName }}">
+        <h2 class="tag-name">
+          <a href="{{ rootPath }}tags/{{ tagName }}/index.html">{{ tagName }}</a>
+        </h2>
+        <ul class="tag-articles">
+          {% for art in tags[tagName] %}
+          <li class="tag-article-item">
+            <a href="{{ rootPath }}series/{{ art.series }}/{{ art.slug }}.html">{{ art.title }}</a>
+            <span class="article-series">{{ art.seriesTitle }}</span>
+            <time>{{ art.date | date('YYYY-MM-DD') }}</time>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

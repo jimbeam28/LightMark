@@ -1,0 +1,137 @@
+/* ===== 响应式调整 ===== */
+
+/* 大桌面：≥1400px - 完整三栏 */
+@media (min-width: 1400px) {
+  :root {
+    --sidebar-width: 300px;
+    --toc-width: 280px;
+  }
+}
+
+/* 小桌面：1024px-1399px - 保留右侧 TOC */
+@media (max-width: 1399px) {
+  .right-sidebar {
+    /* 保留显示，仅调整宽度 */
+    width: 200px;
+  }
+
+  .main-content {
+    margin-right: 200px;
+  }
+
+  .back-to-top {
+    right: calc(200px + var(--space-lg));
+  }
+}
+
+/* 平板：768px-1023px - 左侧变为抽屉 */
+@media (max-width: 1023px) {
+  .left-sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+  }
+
+  .left-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .left-sidebar.closed {
+    transform: translateX(-100%);
+  }
+
+  /* 隐藏桌面端的展开按钮 */
+  .sidebar-toggle {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .content-wrapper {
+    padding: calc(var(--header-height) + var(--space-lg)) var(--space-lg) var(--space-lg);
+  }
+}
+
+/* 手机：<768px */
+@media (max-width: 767px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+
+  .article-title {
+    font-size: 24px;
+  }
+
+  .article-body {
+    font-size: 15px;
+  }
+
+  .article-body h1 {
+    font-size: 22px;
+  }
+
+  .article-body h2 {
+    font-size: 20px;
+  }
+
+  .article-body h3 {
+    font-size: 18px;
+  }
+
+  .article-pagination {
+    flex-direction: column;
+  }
+
+  .pagination-prev,
+  .pagination-next {
+    max-width: 100%;
+  }
+
+  .pagination-next {
+    text-align: left;
+  }
+
+  .content-wrapper {
+    padding: calc(var(--header-height) + var(--space-md)) var(--space-md) var(--space-md);
+  }
+
+  /* 标签页调整 */
+  .tag-article-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .tags-cloud {
+    gap: var(--space-xs);
+  }
+
+  .tag-item {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 13px;
+  }
+}
+
+/* 小手机：<480px */
+@media (max-width: 479px) {
+  .article-title {
+    font-size: 20px;
+  }
+
+  .article-meta {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .back-to-top {
+    width: 36px;
+    height: 36px;
+    bottom: var(--space-md);
+    right: var(--space-md);
+  }
+}

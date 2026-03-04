@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  {% if allSeries.length > 0 and allSeries[0].firstArticle %}
+    {# 显示第一个系列的第一篇文章 #}
+    {% set firstSeries = allSeries[0] %}
+    {% set article = firstSeries.firstArticle %}
+
+    <article class="article-content">
+      <header class="article-header">
+        <div class="article-meta">
+          <span class="series-badge">
+            <a href="{{ rootPath }}series/{{ firstSeries.name }}/index.html">{{ firstSeries.title }}</a>
+          </span>
+          <time datetime="{{ article.date }}">{{ article.date | date('YYYY-MM-DD') }}</time>
+        </div>
+        <h1 class="article-title">{{ article.title }}</h1>
+        {% if article.tags.length > 0 %}
+        <div class="article-tags">
+          {% for tag in article.tags %}
+          <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </header>
+
+      <div class="article-body">
+        {{ article.content | safe }}
+      </div>
+
+      <footer class="article-footer">
+        <a href="{{ rootPath }}series/{{ firstSeries.name }}/{{ article.slug }}.html" class="read-more">
+          查看完整文章 →
+        </a>
+      </footer>
+    </article>
+  {% else %}
+    <div class="empty-state">
+      <h1>{{ site.title }}</h1>
+      <p>{{ site.description }}</p>
+      <p>欢迎使用 Double Folding 主题</p>
+      <p>请在 markdown 目录下添加文章</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block rightSidebar %}
+{% if allSeries.length > 0 and allSeries[0].firstArticle and allSeries[0].firstArticle.toc and allSeries[0].firstArticle.toc.length > 0 %}
+{% set article = allSeries[0].firstArticle %}
+<aside class="right-sidebar" id="rightSidebar">
+  <div class="toc-header">
+    <button class="toc-toggle-btn toc-close-btn" id="tocCloseBtn" title="隐藏目录" aria-label="隐藏目录">
+      <span>›</span>
+    </button>
+    <h3 class="toc-title">目录</h3>
+    <button class="toc-toggle-btn toc-show-btn" id="tocShowBtn" title="显示目录" aria-label="显示目录" style="display: none;">
+      <span>‹</span>
+    </button>
+  </div>
+  <div class="toc-container" id="tocContainer">
+    <nav class="toc-nav" id="tocNav">
+      {% for item in article.toc %}
+      <a href="#{{ item.id }}" class="toc-link toc-level-{{ item.level }}" data-level="{{ item.level }}">
+        {{ item.text }}
+      </a>
+      {% endfor %}
+    </nav>
+  </div>
+</aside>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+name: double-folding
+version: 1.0.0
+description: 双折叠导航主题，左侧系列导航可折叠，右侧固定标题索引
+author: LightMark
+license: MIT
+
+features:
+  - responsive
+  - dark-mode
+  - toc-highlight
+  - collapsible-sidebar
+
+config:
+  defaultDarkMode: false
+  tocLevels: [1, 2, 3]
+  sidebarCollapsed: false

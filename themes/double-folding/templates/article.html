@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ article.title }} - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <article class="article-content">
+    <header class="article-header">
+      <div class="article-meta">
+        <span class="series-badge">
+          <a href="{{ rootPath }}series/{{ series.name }}/index.html">{{ series.title }}</a>
+        </span>
+        <time datetime="{{ article.date }}">{{ article.date | date('YYYY-MM-DD') }}</time>
+      </div>
+      <h1 class="article-title">{{ article.title }}</h1>
+      {% if article.tags.length > 0 %}
+      <div class="article-tags">
+        {% for tag in article.tags %}
+        <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </header>
+
+    <div class="article-body">
+      {{ content | safe }}
+    </div>
+
+    <nav class="article-pagination">
+      {% if article.prev %}
+      <div class="pagination-prev">
+        <span>上一篇</span>
+        <a href="{{ rootPath }}series/{{ article.series }}/{{ article.prev.slug }}.html">
+          ← {{ article.prev.title }}
+        </a>
+      </div>
+      {% endif %}
+
+      {% if article.next %}
+      <div class="pagination-next">
+        <span>下一篇</span>
+        <a href="{{ rootPath }}series/{{ article.series }}/{{ article.next.slug }}.html">
+          {{ article.next.title }} →
+        </a>
+      </div>
+      {% endif %}
+    </nav>
+  </article>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ tag }} - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="tag-page">
+    <h1 class="page-title">
+      <span class="tag-label">标签</span>
+      <span class="tag-value">{{ tag }}</span>
+    </h1>
+
+    <div class="tag-articles-list">
+      {% for article in articles %}
+      <article class="tag-article-card">
+        <h2 class="tag-article-title">
+          <a href="{{ rootPath }}series/{{ article.series }}/{{ article.slug }}.html">
+            {{ article.title }}
+          </a>
+        </h2>
+        <div class="tag-article-meta">
+          <span class="article-series">
+            <a href="{{ rootPath }}series/{{ article.series }}/index.html">{{ article.seriesTitle }}</a>
+          </span>
+          <time datetime="{{ article.date }}">{{ article.date | date('YYYY-MM-DD') }}</time>
+        </div>
+        {% if article.excerpt %}
+        <p class="tag-article-excerpt">{{ article.excerpt | striptags | truncate(150) }}</p>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+
+    <div class="tag-actions">
+      <a href="{{ rootPath }}tags/index.html" class="btn-back">← 查看所有标签</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

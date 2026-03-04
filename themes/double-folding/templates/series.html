@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ series.title }} - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  {% if series.firstArticle %}
+    {# 显示系列的第一篇文章内容 #}
+    {% set article = series.firstArticle %}
+
+    <article class="article-content">
+      <header class="article-header">
+        <div class="article-meta">
+          <span class="series-badge">{{ series.title }}</span>
+          <time datetime="{{ article.date }}">{{ article.date | date('YYYY-MM-DD') }}</time>
+        </div>
+        <h1 class="article-title">{{ article.title }}</h1>
+        {% if article.tags.length > 0 %}
+        <div class="article-tags">
+          {% for tag in article.tags %}
+          <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </header>
+
+      <div class="article-body">
+        {{ article.content | safe }}
+      </div>
+
+      <nav class="article-pagination">
+        {% if series.articles.length > 1 %}
+        <div class="pagination-next">
+          <span>下一篇</span>
+          <a href="{{ rootPath }}series/{{ series.name }}/{{ series.articles[1].slug }}.html">
+            {{ series.articles[1].title }}
+          </a>
+        </div>
+        {% endif %}
+      </nav>
+    </article>
+  {% else %}
+    <div class="empty-state">
+      <h1>{{ series.title }}</h1>
+      <p>该系列暂无文章</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -16,7 +16,7 @@
     {% for article in articles %}
     <article class="article-card">
       <h2 class="article-card-title">
-        <a href="{{ rootPath }}series/{{ article.series }}/{{ article.slug }}.html">{{ article.title }}</a>
+        <a href="{{ rootPath }}{{ article.url }}">{{ article.title }}</a>
       </h2>
       <div class="article-card-meta">
         <span class="series-name">{{ article.seriesTitle }}</span>
@@ -25,7 +25,7 @@
       <p class="article-card-excerpt">{{ article.excerpt }}</p>
       <div class="article-card-tags">
         {% for t in article.tags %}
-        <a href="{{ rootPath }}tags/{{ t }}/index.html" class="tag{% if t == tag %} active{% endif %}">{{ t }}</a>
+        <a href="{{ rootPath }}{{ url('tag', t) }}" class="tag{% if t == tag %} active{% endif %}">{{ t }}</a>
         {% endfor %}
       </div>
     </article>

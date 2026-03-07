@@ -1,5 +1,7 @@
 import path from 'path'
 import { loadConfig } from '../utils/config.js'
+import { loadThemeConfig, getTemplateForPage } from '../utils/theme.js'
+import { createUrlGenerator } from '../utils/url.js'
 import {
   ensureDir,
   remove,
@@ -23,7 +25,7 @@ import { createRenderer, render } from '../renderer/nunjucks.js'
 export async function build(rootDir, options = {}) {
   console.log('Starting build...')
 
-  // 1. Load configuration
+  // 1. Load site configuration
   const config = await loadConfig(rootDir)
   console.log(`Site: ${config.title}`)
 
@@ -33,26 +35,33 @@ export async function build(rootDir, options = {}) {
   const outputDir = path.join(rootDir, options.output || config.output)
   const themeDir = path.join(themesDir, config.theme)
 
-  // 3. Clean output directory
+  // 3. Load theme configuration
+  const themeConfig = await loadThemeConfig(themeDir)
+  console.log(`Theme: ${themeConfig.name}`)
+
+  // 4. Create URL generator with theme config
+  const urlGenerator = createUrlGenerator(themeConfig, config.url)
+
+  // 5. Clean output directory
   await remove(outputDir)
   await ensureDir(outputDir)
 
-  // 4. Parse all articles
+  // 6. Parse all articles
   console.log('Parsing articles...')
-  const articles = await parseAllArticles(markdownDir, config)
+  const articles = await parseAllArticles(markdownDir, config, themeConfig)
   console.log(`Found ${articles.length} articles`)
 
-  // 5. Build site data
-  const siteData = buildSiteData(config, articles)
+  // 7. Build site data with URL generator
+  const siteData = buildSiteData(config, articles, urlGenerator)
 
-  // 6. Load theme and create renderer
-  const renderer = createRenderer(themeDir)
+  // 8. Create renderer with URL generator
+  const renderer = createRenderer(themeDir, urlGenerator)
 
-  // 7. Render pages
+  // 9. Render pages
   console.log('Rendering pages...')
-  await renderPages(renderer, siteData, outputDir)
+  await renderPages(renderer, siteData, outputDir, urlGenerator, themeConfig)
 
-  // 8. Copy theme assets
+  // 10. Copy theme assets
   const assetsSrc = path.join(themeDir, 'assets')
   const assetsDest = path.join(outputDir, 'assets')
   const assetsExists = await pathExists(assetsSrc)
@@ -74,9 +83,10 @@ export async function build(rootDir, options = {}) {
  * Parse all markdown articles
  * @param {string} markdownDir - Markdown directory
  * @param {Object} config - Site configuration
+ * @param {Object} themeConfig - Theme configuration
  * @returns {Promise<Array>} - Array of article objects
  */
-async function parseAllArticles(markdownDir, config) {
+async function parseAllArticles(markdownDir, config, themeConfig) {
   const articles = []
   const md = await createMarkdownRenderer()
 
@@ -92,10 +102,9 @@ async function parseAllArticles(markdownDir, config) {
       const html = await markdownToHtml(article.rawContent, md)
 
       // Process headings (add IDs and extract TOC)
-      const { html: processedHtml, toc } = processHeadings(
-        html,
-        config.markdown?.tocLevel || [2, 3, 4]
-      )
+      // Use theme config for tocLevels if available
+      const tocLevels = themeConfig.config?.tocLevels || config.markdown?.tocLevel || [2, 3, 4]
+      const { html: processedHtml, toc } = processHeadings(html, tocLevels)
 
       // Extract excerpt if not provided
       if (!article.excerpt) {
@@ -112,6 +121,7 @@ async function parseAllArticles(markdownDir, config) {
       articles.push(article)
     } catch (err) {
       console.error(`Error parsing ${filePath}: ${err.message}`)
+      throw err
     }
   }
 
@@ -119,122 +129,143 @@ async function parseAllArticles(markdownDir, config) {
 }
 
 /**
- * Render all pages
+ * Render all pages using theme configuration
  * @param {Object} renderer - Nunjucks renderer
  * @param {Object} siteData - Site data
  * @param {string} outputDir - Output directory
+ * @param {Object} urlGenerator - URL generator
+ * @param {Object} themeConfig - Theme configuration
  */
-async function renderPages(renderer, siteData, outputDir) {
-  // Render homepage
-  await renderHomePage(renderer, siteData, outputDir)
+async function renderPages(renderer, siteData, outputDir, urlGenerator, themeConfig) {
+  // Define page renderers based on theme config
+  const pageRenderers = [
+    {
+      type: 'home',
+      getItems: () => [{ key: 'home', data: {} }],
+      getContext: (item) => ({
+        title: siteData.site.title
+      })
+    },
+    {
+      type: 'series',
+      getItems: () => siteData.series.map(s => ({ key: s.name, data: { series: s } })),
+      getContext: (item) => ({
+        series: item.data.series,
+        title: item.data.series.title
+      })
+    },
+    {
+      type: 'article',
+      getItems: () => siteData.articles
+        .filter(a => a.series)
+        .map(a => ({ key: a.slug, data: { article: a } })),
+      getContext: (item) => {
+        const article = item.data.article
+        return {
+          article,
+          content: article.content,
+          toc: article.toc,
+          series: siteData.series.find(s => s.name === article.series),
+          title: article.title
+        }
+      }
+    },
+    {
+      type: 'tags',
+      getItems: () => {
+        const tagIndices = Object.entries(siteData.tags).map(([name, articles]) => ({
+          name,
+          count: articles.length,
+          url: urlGenerator.tag(name)
+        })).sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count
+          return a.name.localeCompare(b.name)
+        })
+        return [{ key: 'index', data: { tags: tagIndices } }]
+      },
+      getContext: (item) => ({
+        tags: item.data.tags,
+        title: 'Tags'
+      })
+    },
+    {
+      type: 'tag',
+      getItems: () => Object.entries(siteData.tags).map(([name, articles]) => ({
+        key: name,
+        data: { tag: name, articles }
+      })),
+      getContext: (item) => ({
+        tag: item.data.tag,
+        articles: item.data.articles,
+        title: `Tag: ${item.data.tag}`
+      })
+    }
+  ]
 
-  // Render series pages
-  await renderSeriesPages(renderer, siteData, outputDir)
-
-  // Render article pages
-  await renderArticlePages(renderer, siteData, outputDir)
-
-  // Render tags pages
-  await renderTagsPages(renderer, siteData, outputDir)
-}
-
-/**
- * Render homepage
- */
-async function renderHomePage(renderer, siteData, outputDir) {
-  const context = createPageContext('home', siteData, {
-    title: siteData.site.title,
-    rootPath: './'
-  })
-
-  const html = render(renderer, 'home.html', context)
-  await writeFile(path.join(outputDir, 'index.html'), html)
-}
-
-/**
- * Render series pages
- */
-async function renderSeriesPages(renderer, siteData, outputDir) {
-  for (const series of siteData.series) {
-    const seriesDir = path.join(outputDir, 'series', series.name)
-    await ensureDir(seriesDir)
-
-    const context = createPageContext('series', siteData, {
-      series,
-      title: series.title,
-      rootPath: '../../'
-    })
-
-    const html = render(renderer, 'series.html', context)
-    await writeFile(path.join(seriesDir, 'index.html'), html)
+  // Render each page type
+  for (const pageRenderer of pageRenderers) {
+    await renderPageType(renderer, siteData, outputDir, urlGenerator, themeConfig, pageRenderer)
   }
 }
 
 /**
- * Render article pages
+ * Render a specific page type
+ * @param {Object} renderer - Nunjucks renderer
+ * @param {Object} siteData - Site data
+ * @param {string} outputDir - Output directory
+ * @param {Object} urlGenerator - URL generator
+ * @param {Object} themeConfig - Theme configuration
+ * @param {Object} pageRenderer - Page renderer configuration
  */
-async function renderArticlePages(renderer, siteData, outputDir) {
-  for (const article of siteData.articles) {
-    if (!article.series) continue
+async function renderPageType(renderer, siteData, outputDir, urlGenerator, themeConfig, pageRenderer) {
+  const { type, getItems, getContext } = pageRenderer
 
-    const articleDir = path.join(outputDir, 'series', article.series)
-    await ensureDir(articleDir)
+  // Get template from theme config
+  const template = getTemplateForPage(themeConfig, type)
 
-    const context = createPageContext('article', siteData, {
-      article,
-      content: article.content,
-      toc: article.toc,
-      series: siteData.series.find(s => s.name === article.series),
-      title: article.title,
-      rootPath: '../../'
-    })
+  // Get items to render
+  const items = getItems()
 
-    const html = render(renderer, 'article.html', context)
-    await writeFile(path.join(articleDir, `${article.slug}.html`), html)
+  for (const item of items) {
+    // Generate output path
+    const outputPath = generateOutputPath(type, item, themeConfig, urlGenerator)
+    const fullOutputPath = path.join(outputDir, outputPath)
+
+    // Ensure directory exists
+    await ensureDir(path.dirname(fullOutputPath))
+
+    // Create context
+    const extra = getContext(item)
+    const context = createPageContext(type, outputPath, siteData, urlGenerator, extra)
+
+    // Render and write
+    const html = render(renderer, template, context)
+    await writeFile(fullOutputPath, html)
   }
 }
 
 /**
- * Render tags pages
+ * Generate output path for a page
+ * @param {string} pageType - Page type
+ * @param {Object} item - Item with key and data
+ * @param {Object} themeConfig - Theme configuration
+ * @param {Object} urlGenerator - URL generator
+ * @returns {string} - Output file path
  */
-async function renderTagsPages(renderer, siteData, outputDir) {
-  // Tags index page
-  const tagsDir = path.join(outputDir, 'tags')
-  await ensureDir(tagsDir)
-
-  // Build tag indices from site data
-  const tagIndices = Object.entries(siteData.tags).map(([name, articles]) => ({
-    name,
-    count: articles.length,
-    url: `tags/${name}/index.html`
-  })).sort((a, b) => {
-    if (b.count !== a.count) return b.count - a.count
-    return a.name.localeCompare(b.name)
-  })
-
-  const tagsContext = createPageContext('tags', siteData, {
-    tags: tagIndices,
-    title: 'Tags',
-    rootPath: '../'
-  })
-
-  const tagsHtml = render(renderer, 'tags.html', tagsContext)
-  await writeFile(path.join(tagsDir, 'index.html'), tagsHtml)
-
-  // Individual tag pages
-  for (const [tagName, tagArticles] of Object.entries(siteData.tags)) {
-    const tagDir = path.join(tagsDir, tagName)
-    await ensureDir(tagDir)
-
-    const context = createPageContext('tag', siteData, {
-      tag: tagName,
-      articles: tagArticles,
-      title: `Tag: ${tagName}`,
-      rootPath: '../../'
-    })
-
-    const html = render(renderer, 'tag.html', context)
-    await writeFile(path.join(tagDir, 'index.html'), html)
+function generateOutputPath(pageType, item, themeConfig, urlGenerator) {
+  switch (pageType) {
+    case 'home':
+      return 'index.html'
+    case 'series':
+      return urlGenerator.series(item.key)
+    case 'article':
+      return urlGenerator.article(item.data.article)
+    case 'tags':
+      return urlGenerator.tags()
+    case 'tag':
+      return urlGenerator.tag(item.key)
+    default:
+      throw new Error(`Unknown page type: ${pageType}`)
   }
 }
 

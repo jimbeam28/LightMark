@@ -4,9 +4,10 @@ import path from 'path'
 /**
  * Create and configure Nunjucks environment
  * @param {string} themeDir - Theme directory path
+ * @param {Object} urlGenerator - URL generator instance
  * @returns {nunjucks.Environment}
  */
-export function createRenderer(themeDir) {
+export function createRenderer(themeDir, urlGenerator) {
   const templateDir = path.join(themeDir, 'templates')
 
   // Create environment with file system loader
@@ -20,7 +21,7 @@ export function createRenderer(themeDir) {
   addFilters(env)
 
   // Add custom globals
-  addGlobals(env)
+  addGlobals(env, urlGenerator)
 
   return env
 }
@@ -89,12 +90,52 @@ function addFilters(env) {
 /**
  * Add global variables to Nunjucks environment
  * @param {nunjucks.Environment} env
+ * @param {Object} urlGenerator - URL generator instance
  */
-function addGlobals(env) {
+function addGlobals(env, urlGenerator) {
   // Add helper to check if variable is defined
   env.addGlobal('isDefined', (val) => {
     return val !== undefined && val !== null
   })
+
+  // Add URL generator functions if provided
+  if (urlGenerator) {
+    // url('article', article) -> generates URL for article
+    // url('series', seriesName) -> generates URL for series
+    // url('tag', tagName) -> generates URL for tag
+    // url('tags') -> generates URL for tags index
+    // url('home') -> generates URL for home
+    env.addGlobal('url', (type, ...args) => {
+      switch (type) {
+        case 'article':
+          return urlGenerator.article(args[0])
+        case 'series':
+          return urlGenerator.series(args[0])
+        case 'tag':
+          return urlGenerator.tag(args[0])
+        case 'tags':
+          return urlGenerator.tags()
+        case 'home':
+          return urlGenerator.home()
+        default:
+          console.warn(`Unknown URL type: ${type}`)
+          return '#'
+      }
+    })
+
+    // asset('css/style.css') -> generates asset URL
+    env.addGlobal('asset', (path) => {
+      return urlGenerator.asset(path)
+    })
+
+    // relative(fromPage, toPath) -> generates relative path
+    env.addGlobal('relative', (fromPage, toPath) => {
+      return urlGenerator.relative(fromPage, toPath)
+    })
+
+    // Store urlGenerator for context helpers
+    env.addGlobal('_urlGenerator', urlGenerator)
+  }
 }
 
 /**

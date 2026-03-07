@@ -56,22 +56,29 @@ export function organizeData(articles) {
  * Build site data structure for templates
  * @param {Object} config - Site configuration
  * @param {Array} articles - Array of article objects
+ * @param {Object} urlGenerator - URL generator instance
  * @returns {Object} - Site data structure
  */
-export function buildSiteData(config, articles) {
+export function buildSiteData(config, articles, urlGenerator) {
   const { series, tags } = organizeData(articles)
 
-  // Generate URLs for articles
+  // Generate URLs for articles and add prev/next navigation
   for (const article of articles) {
-    article.url = generateArticleUrl(article)
+    article.url = urlGenerator.article(article)
+  }
+
+  // Add prev/next navigation for articles within each series
+  for (const s of series) {
+    for (let i = 0; i < s.articles.length; i++) {
+      const article = s.articles[i]
+      article.prev = i > 0 ? s.articles[i - 1] : null
+      article.next = i < s.articles.length - 1 ? s.articles[i + 1] : null
+    }
   }
 
   // Generate URLs for series
   for (const s of series) {
-    s.url = `series/${s.name}/index.html`
-    if (s.articles.length > 0) {
-      s.firstArticle = s.articles[0]
-    }
+    s.url = urlGenerator.series(s.name)
   }
 
   return {
@@ -89,33 +96,26 @@ export function buildSiteData(config, articles) {
 }
 
 /**
- * Generate relative URL for an article
- * @param {Object} article - Article object
- * @returns {string} - Article relative URL
- */
-function generateArticleUrl(article) {
-  if (article.series) {
-    return `series/${article.series}/${article.slug}.html`
-  }
-  return `${article.slug}.html`
-}
-
-/**
  * Generate page data for templates
  * @param {string} template - Template name
+ * @param {string} outputPath - Output file path (for calculating relative paths)
  * @param {Object} data - Site data
+ * @param {Object} urlGenerator - URL generator instance
  * @param {Object} extra - Extra page-specific data
  * @returns {Object} - Page context
  */
-export function createPageContext(template, data, extra = {}) {
+export function createPageContext(template, outputPath, data, urlGenerator, extra = {}) {
   return {
     site: data.site,
     allSeries: data.series,
     allTags: Object.keys(data.tags).sort(),
     page: {
       template,
+      outputPath,
       ...extra
     },
+    // Helper for templates to calculate relative paths
+    rootPath: urlGenerator.rootPath(outputPath),
     ...extra
   }
 }

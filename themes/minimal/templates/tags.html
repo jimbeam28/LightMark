@@ -9,7 +9,7 @@
 
   <div class="tags-cloud">
     {% for tag in tags %}
-    <a href="{{ rootPath }}tags/{{ tag.name }}/index.html" class="tag-item" style="font-size: {{ 14 + tag.count * 2 }}px">
+    <a href="{{ rootPath }}{{ tag.url }}" class="tag-item" style="font-size: {{ 14 + tag.count * 2 }}px">
       {{ tag.name }}
       <span class="tag-count">{{ tag.count }}</span>
     </a>

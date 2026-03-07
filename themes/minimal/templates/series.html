@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="page-layout has-sidebar">
-  <!-- 左侧：系列导航 -->
+  <!-- Left: Series Navigation -->
   <aside class="sidebar series-sidebar">
     <div class="sidebar-header">
       <h2 class="sidebar-title">{{ series.title }}</h2>
@@ -14,7 +14,7 @@
 
     <nav class="series-nav">
       {% for article in series.articles %}
-      <a href="./{{ article.slug }}.html" class="series-nav-link{% if loop.first %} active{% endif %}">
+      <a href="{{ rootPath }}{{ article.url }}" class="series-nav-link{% if loop.first %} active{% endif %}">
         <span class="nav-order">{{ article.order }}</span>
         <span class="nav-title">{{ article.title }}</span>
       </a>
@@ -22,10 +22,10 @@
     </nav>
   </aside>
 
-  <!-- 中间：首篇文章内容 -->
+  <!-- Middle: First Article Content -->
   <article class="content-main">
-    {% if series.firstArticle %}
-      {% set article = series.firstArticle %}
+    {% if series.articles.length > 0 %}
+      {% set article = series.articles[0] %}
 
       <header class="article-header">
         <h1 class="article-title">{{ article.title }}</h1>
@@ -34,7 +34,7 @@
           {% if article.tags.length > 0 %}
           <div class="article-tags">
             {% for tag in article.tags %}
-            <a href="{{ rootPath }}tags/{{ tag }}/index.html" class="tag">{{ tag }}</a>
+            <a href="{{ rootPath }}{{ url('tag', tag) }}" class="tag">{{ tag }}</a>
             {% endfor %}
           </div>
           {% endif %}
@@ -47,7 +47,7 @@
 
       <nav class="article-pagination">
         {% if series.articles.length > 1 %}
-        <a href="./{{ series.articles[1].slug }}.html" class="pagination-next">
+        <a href="{{ rootPath }}{{ series.articles[1].url }}" class="pagination-next">
           下一篇：{{ series.articles[1].title }} &rarr;
         </a>
         {% endif %}
@@ -62,5 +62,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ rootPath }}assets/js/sidebar.js"></script>
+<script src="{{ rootPath }}{{ asset('js/sidebar.js') }}"></script>
 {% endblock %}

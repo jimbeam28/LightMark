@@ -14,3 +14,20 @@ config:
   defaultDarkMode: false
   tocLevels: [1, 2, 3]
   sidebarCollapsed: false
+
+pages:
+  home:
+    template: home.html
+    output: index.html
+  series:
+    template: series.html
+    output: series/{name}/index.html
+  article:
+    template: article.html
+    output: series/{series}/{slug}.html
+  tags:
+    template: tags.html
+    output: tags/index.html
+  tag:
+    template: tag.html
+    output: tags/{name}/index.html

@@ -135,7 +135,3 @@ export function createUrlGenerator(themeConfig, siteUrl = '') {
   return new UrlGenerator(themeConfig, siteUrl)
 }
 
-export default {
-  UrlGenerator,
-  createUrlGenerator
-}

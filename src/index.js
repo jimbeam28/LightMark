@@ -11,7 +11,7 @@ export { extractToc, addHeadingIds, processHeadings } from './parser/toc.js'
 // Generator
 export { build } from './generator/index.js'
 export { organizeData, buildSiteData, createPageContext } from './generator/site.js'
-export { generateSearchIndex, generateAllIndices } from './generator/search.js'
+export { generateSearchIndex, generateTagIndex, generateSeriesIndex } from './generator/search.js'
 
 // Renderer
 export { createRenderer, render, renderString } from './renderer/nunjucks.js'
@@ -28,7 +28,6 @@ export {
   pathExists,
   listFiles,
   listMarkdownFiles,
-  listDirectories,
   generateSlug,
   parseOrder
 } from './utils/file.js'

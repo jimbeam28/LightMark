@@ -1,5 +1,6 @@
 import fse from 'fs-extra'
 import path from 'path'
+import { slugFromFilename } from './slug.js'
 
 /**
  * Ensure a directory exists, create if not
@@ -101,35 +102,12 @@ export async function listMarkdownFiles(dir) {
 }
 
 /**
- * Get directories in a directory (non-recursive)
- * @param {string} dir - Directory path
- * @returns {Promise<string[]>} - Directory names
- */
-export async function listDirectories(dir) {
-  const exists = await fse.pathExists(dir)
-  if (!exists) return []
-
-  const dirs = []
-  const items = await fse.readdir(dir, { withFileTypes: true })
-
-  for (const item of items) {
-    if (item.isDirectory()) {
-      dirs.push(item.name)
-    }
-  }
-
-  return dirs
-}
-
-/**
  * Generate slug from filename
  * @param {string} filename - Filename (without extension)
  * @returns {string} - Slug
  */
 export function generateSlug(filename) {
-  // Remove leading numbers and hyphen (e.g., "01-intro" -> "intro")
-  const slug = filename.replace(/^\d+[-_]?/, '')
-  return slug || filename
+  return slugFromFilename(filename)
 }
 
 /**

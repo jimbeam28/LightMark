@@ -1,6 +1,7 @@
 import yaml from 'js-yaml'
 import fse from 'fs-extra'
 import path from 'path'
+import { deepMerge } from './common.js'
 
 const defaultConfig = {
   title: 'LightMark',
@@ -50,30 +51,6 @@ export async function loadConfig(rootDir) {
     console.error(`Error parsing site.yaml: ${err.message}`)
     throw err
   }
-}
-
-/**
- * Deep merge two objects
- * @param {Object} target - Target object
- * @param {Object} source - Source object
- * @returns {Object} - Merged object
- */
-function deepMerge(target, source) {
-  const result = { ...target }
-
-  for (const key in source) {
-    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      if (target[key] && typeof target[key] === 'object') {
-        result[key] = deepMerge(target[key], source[key])
-      } else {
-        result[key] = source[key]
-      }
-    } else {
-      result[key] = source[key]
-    }
-  }
-
-  return result
 }
 
 export { defaultConfig }

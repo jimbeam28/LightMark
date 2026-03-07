@@ -30,6 +30,3 @@ Build Summary:
   }
 }
 
-export default {
-  buildCommand
-}

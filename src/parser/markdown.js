@@ -1,75 +1,128 @@
 import MarkdownIt from 'markdown-it'
 import { createHighlighter } from 'shiki'
-
-let highlighter = null
+import { escapeHtml } from '../utils/slug.js'
 
 /**
- * Initialize Shiki highlighter
+ * Markdown renderer with Shiki code highlighting
+ * Uses instance-based pattern for better testability
  */
-async function initHighlighter() {
-  if (!highlighter) {
-    highlighter = await createHighlighter({
-      themes: ['github-dark', 'github-light'],
-      langs: ['javascript', 'typescript', 'python', 'go', 'rust', 'java', 'c', 'cpp', 'bash', 'json', 'yaml', 'markdown', 'html', 'css', 'sql', 'shell']
+export class MarkdownRenderer {
+  /**
+   * Default language list for syntax highlighting
+   * Can be extended via configuration
+   */
+  static DEFAULT_LANGUAGES = [
+    'javascript', 'typescript', 'python', 'go', 'rust',
+    'java', 'c', 'cpp', 'bash', 'json', 'yaml',
+    'markdown', 'html', 'css', 'sql', 'shell'
+  ]
+
+  /**
+   * Default themes for light/dark mode
+   */
+  static DEFAULT_THEMES = ['github-dark', 'github-light']
+
+  /**
+   * Create a new MarkdownRenderer instance
+   * @param {Object} options - Configuration options
+   * @param {string[]} options.langs - Languages to support
+   * @param {string[]} options.themes - Themes to bundle
+   */
+  constructor(options = {}) {
+    this.langs = options.langs || MarkdownRenderer.DEFAULT_LANGUAGES
+    this.themes = options.themes || MarkdownRenderer.DEFAULT_THEMES
+    this.highlighter = null
+    this.md = null
+  }
+
+  /**
+   * Initialize the Shiki highlighter
+   * @returns {Promise<void>}
+   */
+  async init() {
+    if (this.highlighter) return
+
+    this.highlighter = await createHighlighter({
+      themes: this.themes,
+      langs: this.langs
     })
   }
-  return highlighter
+
+  /**
+   * Get the configured MarkdownIt instance
+   * @returns {Promise<MarkdownIt>}
+   */
+  async getRenderer() {
+    if (this.md) return this.md
+
+    await this.init()
+
+    this.md = new MarkdownIt({
+      html: true,
+      linkify: true,
+      typographer: true,
+      highlight: (code, lang) => this.highlightCode(code, lang)
+    })
+
+    return this.md
+  }
+
+  /**
+   * Highlight code using Shiki
+   * @param {string} code - Code to highlight
+   * @param {string} lang - Language identifier
+   * @returns {string} - Highlighted HTML
+   */
+  highlightCode(code, lang) {
+    if (!this.highlighter) {
+      throw new Error('Renderer not initialized. Call init() first.')
+    }
+
+    try {
+      return this.highlighter.codeToHtml(code, {
+        lang: lang || 'text',
+        themes: {
+          light: 'github-light',
+          dark: 'github-dark'
+        }
+      })
+    } catch {
+      return `<pre><code>${escapeHtml(code)}</code></pre>`
+    }
+  }
+
+  /**
+   * Render markdown to HTML
+   * @param {string} markdown - Markdown content
+   * @returns {Promise<string>} - HTML content
+   */
+  async render(markdown) {
+    const renderer = await this.getRenderer()
+    return renderer.render(markdown)
+  }
 }
 
 /**
  * Create markdown renderer with code highlighting
- * @returns {Promise<MarkdownIt>}
+ * Factory function for backward compatibility
+ * @param {Object} options - Configuration options
+ * @returns {Promise<MarkdownRenderer>}
  */
-export async function createMarkdownRenderer() {
-  await initHighlighter()
-
-  const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    highlight: (code, lang) => {
-      try {
-        return highlighter.codeToHtml(code, {
-          lang: lang || 'text',
-          themes: {
-            light: 'github-light',
-            dark: 'github-dark'
-          }
-        })
-      } catch {
-        return `<pre><code>${escapeHtml(code)}</code></pre>`
-      }
-    }
-  })
-
-  return md
+export async function createMarkdownRenderer(options = {}) {
+  const renderer = new MarkdownRenderer(options)
+  await renderer.init()
+  return renderer
 }
 
 /**
  * Convert markdown to HTML
  * @param {string} markdown - Markdown content
- * @param {MarkdownIt} [md] - Markdown renderer instance
+ * @param {MarkdownRenderer} [renderer] - Optional renderer instance
  * @returns {Promise<string>} - HTML content
  */
-export async function markdownToHtml(markdown, md) {
-  const renderer = md || await createMarkdownRenderer()
-  return renderer.render(markdown)
-}
-
-/**
- * Escape HTML special characters
- * @param {string} str - String to escape
- * @returns {string}
- */
-function escapeHtml(str) {
-  const htmlEntities = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }
-  return str.replace(/[&<>"']/g, char => htmlEntities[char])
+export async function markdownToHtml(markdown, renderer) {
+  const md = renderer || await createMarkdownRenderer()
+  return md.render(markdown)
 }
 
 /**
@@ -90,10 +143,4 @@ export function extractExcerpt(html, length = 200) {
   }
 
   return text.slice(0, length).trim() + '...'
-}
-
-export default {
-  createMarkdownRenderer,
-  markdownToHtml,
-  extractExcerpt
 }

@@ -1,6 +1,6 @@
 import matter from 'gray-matter'
 import path from 'path'
-import { readFile } from '../utils/file.js'
+import { readFile, generateSlug, parseOrder } from '../utils/file.js'
 
 /**
  * Parse front matter from markdown content
@@ -70,23 +70,3 @@ export async function parseArticle(filePath, markdownDir) {
   return article
 }
 
-/**
- * Generate slug from filename
- */
-function generateSlug(filename) {
-  const slug = filename.replace(/^\d+[-_]?/, '')
-  return slug || filename
-}
-
-/**
- * Parse order from filename
- */
-function parseOrder(filename) {
-  const match = filename.match(/^(\d+)/)
-  return match ? parseInt(match[1], 10) : 999
-}
-
-export default {
-  parseFrontMatter,
-  parseArticle
-}

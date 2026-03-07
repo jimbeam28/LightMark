@@ -1,0 +1,36 @@
+# LightMark Site Configuration
+
+# ============================================
+# Site Information
+# ============================================
+title: My Notes
+description: A personal knowledge base
+author:
+url:
+language: zh-CN
+
+# ============================================
+# Theme Configuration
+# ============================================
+theme: minimal
+darkMode: true
+
+# ============================================
+# Build Configuration
+# ============================================
+output: dist
+perPage: 20
+
+# ============================================
+# Markdown Configuration
+# ============================================
+markdown:
+  tocLevel: [2, 3, 4]
+  excerptLength: 200
+
+# ============================================
+# SEO Configuration (Optional)
+# ============================================
+seo:
+  googleAnalytics:
+  baiduAnalytics:

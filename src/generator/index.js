@@ -269,6 +269,3 @@ function generateOutputPath(pageType, item, themeConfig, urlGenerator) {
   }
 }
 
-export default {
-  build
-}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Tags - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="tags-page">
+  <h1>Tags</h1>
+  <div class="tags-cloud">
+    {% for tag in tags %}
+    <a href="{{ rootPath }}{{ tag.url }}" class="tag">
+      {{ tag.name }}
+      <span class="count">({{ tag.count }})</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

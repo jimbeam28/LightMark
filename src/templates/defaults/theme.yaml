@@ -1,0 +1,32 @@
+name: minimal
+version: 1.0.0
+description: LightMark minimal theme
+author: LightMark
+license: MIT
+
+features:
+  - responsive
+  - dark-mode
+  - toc-highlight
+
+config:
+  defaultDarkMode: false
+  tocLevels: [2, 3]
+  codeTheme: github-dark
+
+pages:
+  home:
+    template: home.html
+    output: index.html
+  series:
+    template: series.html
+    output: series/{name}/index.html
+  article:
+    template: article.html
+    output: series/{series}/{slug}.html
+  tags:
+    template: tags.html
+    output: tags/index.html
+  tag:
+    template: tag.html
+    output: tags/{name}/index.html

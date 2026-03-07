@@ -71,23 +71,3 @@ export function generateSeriesIndex(series) {
 
   return index
 }
-
-/**
- * Generate all search indices
- * @param {Object} siteData - Site data structure
- * @returns {Object} - All indices
- */
-export function generateAllIndices(siteData) {
-  return {
-    search: generateSearchIndex(siteData.articles),
-    tags: generateTagIndex(siteData.tags),
-    series: generateSeriesIndex(siteData.series)
-  }
-}
-
-export default {
-  generateSearchIndex,
-  generateTagIndex,
-  generateSeriesIndex,
-  generateAllIndices
-}

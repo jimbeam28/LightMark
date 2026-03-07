@@ -1,3 +1,5 @@
+import { slugFromHeading, stripHtml } from '../utils/slug.js'
+
 /**
  * Extract table of contents from HTML
  * @param {string} html - HTML content
@@ -14,7 +16,7 @@ export function extractToc(html, levels = [2, 3, 4]) {
 
     if (levels.includes(level)) {
       const text = stripHtml(match[2]).trim()
-      const id = generateId(text, toc.length)
+      const id = slugFromHeading(text, toc.length)
 
       toc.push({
         level,
@@ -45,7 +47,7 @@ export function addHeadingIds(html, levels = [2, 3, 4]) {
     }
 
     const text = stripHtml(content).trim()
-    const id = generateId(text, index++)
+    const id = slugFromHeading(text, index++)
 
     // Check if ID already exists
     if (attrs.includes('id=')) {
@@ -72,44 +74,3 @@ export function processHeadings(html, levels = [2, 3, 4]) {
   }
 }
 
-/**
- * Strip HTML tags from string
- * @param {string} str - String with HTML
- * @returns {string} - Plain text
- */
-function stripHtml(str) {
-  return str
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-}
-
-/**
- * Generate URL-friendly ID from text
- * @param {string} text - Heading text
- * @param {number} index - Fallback index
- * @returns {string} - ID
- */
-function generateId(text, index) {
-  // Slugify the text
-  const slug = text
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-|-$/g, '')
-
-  // If slug is empty or too short, use index
-  if (slug.length < 2) {
-    return `heading-${index}`
-  }
-
-  return slug
-}
-
-export default {
-  extractToc,
-  addHeadingIds,
-  processHeadings
-}

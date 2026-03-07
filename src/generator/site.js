@@ -120,8 +120,3 @@ export function createPageContext(template, outputPath, data, urlGenerator, extr
   }
 }
 
-export default {
-  organizeData,
-  buildSiteData,
-  createPageContext
-}

@@ -1,5 +1,6 @@
 import nunjucks from 'nunjucks'
 import path from 'path'
+import { slugify, stripHtml } from '../utils/slug.js'
 
 /**
  * Create and configure Nunjucks environment
@@ -45,12 +46,7 @@ function addFilters(env) {
   })
 
   // Slugify filter
-  env.addFilter('slug', (str) => {
-    return str
-      .toLowerCase()
-      .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-      .replace(/^-|-$/g, '')
-  })
+  env.addFilter('slug', (str) => slugify(str))
 
   // Truncate filter
   env.addFilter('truncate', (str, length = 200) => {
@@ -59,10 +55,7 @@ function addFilters(env) {
   })
 
   // Strip HTML filter
-  env.addFilter('striptags', (str) => {
-    if (!str) return ''
-    return str.replace(/<[^>]+>/g, '')
-  })
+  env.addFilter('striptags', (str) => stripHtml(str))
 
   // JSON stringify filter
   env.addFilter('json', (obj) => {
@@ -160,8 +153,3 @@ export function renderString(env, str, context) {
   return env.renderString(str, context)
 }
 
-export default {
-  createRenderer,
-  render,
-  renderString
-}

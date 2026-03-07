@@ -1,5 +1,6 @@
 import path from 'path'
 import { ensureDir, writeFile, pathExists, listFiles } from '../../utils/file.js'
+import { slugify } from '../../utils/slug.js'
 
 /**
  * Create a new article
@@ -22,7 +23,7 @@ export async function newArticle(series, options = {}) {
 
   // Generate slug from title or default
   const title = options.title || 'New Article'
-  const slug = generateSlug(title)
+  const slug = slugify(title)
   const filename = `${orderStr}-${slug}.md`
   const filePath = path.join(seriesDir, filename)
 
@@ -67,19 +68,6 @@ async function getNextOrder(seriesDir) {
 }
 
 /**
- * Generate URL-friendly slug from title
- * @param {string} title - Article title
- * @returns {string}
- */
-function generateSlug(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 50) || 'article'
-}
-
-/**
  * Create markdown content with front matter
  * @param {string} title - Article title
  * @param {string} series - Series name
@@ -113,8 +101,4 @@ Start writing your content here...
 `
 
   return frontMatter
-}
-
-export default {
-  newArticle
 }

@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ article.title }} - {{ site.title }}{% endblock %}
+
+{% block content %}
+<div class="article-page">
+  <aside class="series-sidebar">
+    <h3><a href="{{ rootPath }}{{ series.url }}">{{ series.title }}</a></h3>
+    <ul class="article-list">
+      {% for a in series.articles %}
+      <li>
+        <a href="{{ rootPath }}{{ a.url }}" class="{% if a.slug == article.slug %}active{% endif %}">
+          {{ a.title }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </aside>
+
+  <article class="article-content">
+    <header class="article-header">
+      <h1>{{ article.title }}</h1>
+      <div class="meta">
+        <time>{{ article.date | date }}</time>
+        {% if article.tags %}
+        <span class="tags">
+          {% for tag in article.tags %}
+          <a href="{{ rootPath }}{{ url('tag', tag) }}" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </span>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="article-body">
+      {{ content | safe }}
+    </div>
+
+    <nav class="article-nav">
+      {% if article.prev %}
+      <a href="{{ rootPath }}{{ article.prev.url }}" class="prev">
+        <span class="label">Previous</span>
+        <span class="title">&larr; {{ article.prev.title }}</span>
+      </a>
+      {% endif %}
+      {% if article.next %}
+      <a href="{{ rootPath }}{{ article.next.url }}" class="next">
+        <span class="label">Next</span>
+        <span class="title">{{ article.next.title }} &rarr;</span>
+      </a>
+      {% endif %}
+    </nav>
+  </article>
+
+  <aside class="toc-sidebar">
+    <div class="toc" id="toc">
+      {{ toc | safe }}
+    </div>
+  </aside>
+</div>
+{% endblock %}
